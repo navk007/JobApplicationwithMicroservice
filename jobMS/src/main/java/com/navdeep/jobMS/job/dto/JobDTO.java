@@ -1,9 +1,11 @@
 package com.navdeep.jobMS.job.dto;
 
-import com.navdeep.jobMS.job.Job;
 import com.navdeep.jobMS.job.external.Company;
+import com.navdeep.jobMS.job.external.Review;
 
-public class JobWithCompanyDTO {
+import java.util.List;
+
+public class JobDTO {
     private Long id;
     private String title;
     private String description;
@@ -11,8 +13,9 @@ public class JobWithCompanyDTO {
     private String minSalary;
     private String location;
     private Company company;
+    private List<Review> reviews;
 
-    public JobWithCompanyDTO() {
+    public JobDTO() {
     }
 
     public Long getId() {
@@ -69,5 +72,13 @@ public class JobWithCompanyDTO {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    public List<Review> getReview() {
+        return reviews;
+    }
+
+    public void setReview(List<Review> reviews) {
+        this.reviews = reviews;
     }
 }

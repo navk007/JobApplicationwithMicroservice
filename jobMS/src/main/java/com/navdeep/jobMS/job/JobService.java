@@ -1,13 +1,13 @@
 package com.navdeep.jobMS.job;
 
 import java.util.List;
-import com.navdeep.jobMS.job.Job;
-import com.navdeep.jobMS.job.dto.JobWithCompanyDTO;
+
+import com.navdeep.jobMS.job.dto.JobDTO;
 
 public interface JobService {
-    List<JobWithCompanyDTO> findAll();
+    List<JobDTO> findAll();
     void createJob(Job job);
-    JobWithCompanyDTO getJobById(Long jobId);
+    JobDTO getJobById(Long jobId);
     Boolean deleteById(Long jobId);
     Boolean updateJob(Long jobId, Job job);
 }

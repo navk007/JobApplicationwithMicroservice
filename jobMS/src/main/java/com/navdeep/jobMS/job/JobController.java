@@ -1,14 +1,10 @@
 package com.navdeep.jobMS.job;
 
-import com.navdeep.jobMS.job.dto.JobWithCompanyDTO;
-import com.navdeep.jobMS.job.external.Company;
+import com.navdeep.jobMS.job.dto.JobDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.navdeep.jobMS.job.Job;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -22,7 +18,7 @@ public class JobController {
     }
     // Get all jobs
     @GetMapping
-    public ResponseEntity<List<JobWithCompanyDTO>> firstAll(){
+    public ResponseEntity<List<JobDTO>> firstAll(){
         return new ResponseEntity<>(jobService.findAll(), HttpStatus.OK);
     }
 
@@ -35,10 +31,10 @@ public class JobController {
 
     // Get specific Job with JobID: id
     @GetMapping("/{id}")
-    public ResponseEntity<JobWithCompanyDTO> getJobById(@PathVariable Long id){
-        JobWithCompanyDTO jobWithCompanyDTO=jobService.getJobById(id);
+    public ResponseEntity<JobDTO> getJobById(@PathVariable Long id){
+        JobDTO jobDTO =jobService.getJobById(id);
 
-        if(jobWithCompanyDTO != null) return new ResponseEntity<>(jobWithCompanyDTO,HttpStatus.OK);
+        if(jobDTO != null) return new ResponseEntity<>(jobDTO,HttpStatus.OK);
         else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
