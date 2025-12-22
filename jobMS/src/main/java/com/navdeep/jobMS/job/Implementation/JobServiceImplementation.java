@@ -5,6 +5,7 @@ import com.navdeep.jobMS.job.JobRepository;
 import com.navdeep.jobMS.job.JobService;
 import com.navdeep.jobMS.job.dto.JobWithCompanyDTO;
 import com.navdeep.jobMS.job.external.Company;
+import com.navdeep.jobMS.job.mapper.JobMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -25,11 +26,9 @@ public class JobServiceImplementation implements JobService {
     }
 
     private JobWithCompanyDTO convertToDto(Job job){
-        JobWithCompanyDTO jobWithCompanyDTO=new JobWithCompanyDTO();
-        jobWithCompanyDTO.setJob(job);
 
         Company company = restTemplate.getForObject("http://COMPANYMS:8081/companies/" + job.getCompanyId(), Company.class);
-        jobWithCompanyDTO.setCompany(company);
+        JobWithCompanyDTO jobWithCompanyDTO=JobMapper.mapToJobWithCompanyDto(job, company);
 
         return jobWithCompanyDTO;
     }
