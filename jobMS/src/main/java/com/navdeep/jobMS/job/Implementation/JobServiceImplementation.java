@@ -3,9 +3,16 @@ package com.navdeep.jobMS.job.Implementation;
 import com.navdeep.jobMS.job.Job;
 import com.navdeep.jobMS.job.JobRepository;
 import com.navdeep.jobMS.job.JobService;
-import com.navdeep.jobMS.job.dto.JobWithCompanyDTO;
+import com.navdeep.jobMS.job.clients.CompanyClient;
+import com.navdeep.jobMS.job.clients.ReviewClient;
+import com.navdeep.jobMS.job.dto.JobDTO;
 import com.navdeep.jobMS.job.external.Company;
+import com.navdeep.jobMS.job.external.Review;
+import com.navdeep.jobMS.job.mapper.JobMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,34 +24,49 @@ import java.util.Optional;
 public class JobServiceImplementation implements JobService {
     JobRepository jobRepository;
 
+    private CompanyClient companyClient;
+    private ReviewClient reviewClient;
+
     @Autowired
     RestTemplate restTemplate;
 
-    public JobServiceImplementation(JobRepository jobRepository) {
+    public JobServiceImplementation(JobRepository jobRepository, CompanyClient companyClient, ReviewClient reviewClient) {
         this.jobRepository = jobRepository;
+        this.companyClient = companyClient;
+        this.reviewClient = reviewClient;
     }
 
-    private JobWithCompanyDTO convertToDto(Job job){
-        JobWithCompanyDTO jobWithCompanyDTO=new JobWithCompanyDTO();
-        jobWithCompanyDTO.setJob(job);
+    private JobDTO convertToDto(Job job){
+//        Before OpenFeignCleint Integration
+//        Company company = restTemplate.getForObject("http://COMPANYMS:8081/companies/" + job.getCompanyId(), Company.class);
+//        ResponseEntity<List<Review>> reviewResponse=restTemplate.exchange(
+//                "http://REVIEWMS:8083/reviews?companyId=" + job.getCompanyId(),
+//                HttpMethod.GET,
+//                null,
+//                new ParameterizedTypeReference<List<Review>>(){
+//                });
+//        List<Review> reviews=reviewResponse.getBody();
 
-        Company company = restTemplate.getForObject("http://COMPANYMS:8081/companies/" + job.getCompanyId(), Company.class);
-        jobWithCompanyDTO.setCompany(company);
+//        After OpenFeignCleint Integration
+        Company company = companyClient.getCompany(job.getCompanyId());
+        List<Review> reviews=reviewClient.getReviews(job.getCompanyId());
 
-        return jobWithCompanyDTO;
+        JobDTO jobDTO =JobMapper.mapToJobWithCompanyDto(job, company, reviews);
+
+        return jobDTO;
     }
 
     @Override
-    public List<JobWithCompanyDTO> findAll() {
+    public List<JobDTO> findAll() {
         List<Job> jobs=jobRepository.findAll();
-        List<JobWithCompanyDTO> jobWithCompanyDTOs = new ArrayList<>();
+        List<JobDTO> jobDTOS = new ArrayList<>();
 
         for(Job job: jobs){
-            JobWithCompanyDTO jobWithCompanyDTO=convertToDto(job);
-            jobWithCompanyDTOs.add(jobWithCompanyDTO);
+            JobDTO jobDTO =convertToDto(job);
+            jobDTOS.add(jobDTO);
         }
 
-        return jobWithCompanyDTOs;
+        return jobDTOS;
     }
 
     @Override
@@ -53,7 +75,7 @@ public class JobServiceImplementation implements JobService {
     }
 
     @Override
-    public JobWithCompanyDTO getJobById(Long id){
+    public JobDTO getJobById(Long id){
         Job job=jobRepository.findById(id).orElse(null);
         return convertToDto(job);
     }
