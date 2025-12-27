@@ -10,12 +10,14 @@
         <module name="companyMS" />
         <module name="service-reg" />
         <module name="jobMS" />
+        <module name="configServer" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="companyMS" options="-parameters" />
+      <module name="configServer" options="-parameters" />
       <module name="jobMS" options="-parameters" />
       <module name="reviewMS" options="-parameters" />
       <module name="service-reg" options="-parameters" />
