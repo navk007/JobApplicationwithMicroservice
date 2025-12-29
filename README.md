@@ -8,7 +8,7 @@ Think of it as a miniature hiring backend: companies post jobs, candidates apply
 
 ## Table of Contents
 - [Why this project?](#why-this-project)
-- [Highlights](#highlights) ojoiuoiuouo
+- [Highlights](#highlights)
 - [Architecture overview](#architecture-overview)
 - [Getting started (quick)](#getting-started-quick)
 - [Run locally (docker-compose)](#run-locally-docker-compose)
