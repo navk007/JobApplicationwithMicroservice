@@ -16,6 +16,7 @@ public class JobController {
     public JobController(JobService jobService){
         this.jobService=jobService;
     }
+
     // Get all jobs
     @GetMapping
     public ResponseEntity<List<JobDTO>> firstAll(){
@@ -38,6 +39,7 @@ public class JobController {
         else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    //  Delete a Job with JobID: id
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteJob(@PathVariable Long id){
         Boolean isDeleted=jobService.deleteById(id);
@@ -46,6 +48,7 @@ public class JobController {
         else return new ResponseEntity<>("Job not Found", HttpStatus.NOT_FOUND);
     }
 
+//    Update a Job with JobID: id
 //    @PutMapping("/{id}")
 //    public ResponseEntity<Job> updateJob(@PathVariable Long id, @RequestBody Job updatedJob){
 //        Boolean isUpdated=jobService.updateJob(id, updatedJob);

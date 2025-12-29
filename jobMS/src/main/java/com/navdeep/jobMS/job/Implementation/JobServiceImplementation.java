@@ -36,7 +36,7 @@ public class JobServiceImplementation implements JobService {
         this.reviewClient = reviewClient;
     }
 
-    private JobDTO convertToDto(Job job){
+    private JobDTO convertToDto(Job job) {
 //        Before OpenFeignCleint Integration
 //        Company company = restTemplate.getForObject("http://COMPANYMS:8081/companies/" + job.getCompanyId(), Company.class);
 //        ResponseEntity<List<Review>> reviewResponse=restTemplate.exchange(
@@ -49,9 +49,9 @@ public class JobServiceImplementation implements JobService {
 
 //        After OpenFeignCleint Integration
         Company company = companyClient.getCompany(job.getCompanyId());
-        List<Review> reviews=reviewClient.getReviews(job.getCompanyId());
+        List<Review> reviews = reviewClient.getReviews(job.getCompanyId());
 
-        JobDTO jobDTO =JobMapper.mapToJobWithCompanyDto(job, company, reviews);
+        JobDTO jobDTO = JobMapper.mapToJobWithCompanyDto(job, company, reviews);
 
         return jobDTO;
     }
@@ -62,8 +62,10 @@ public class JobServiceImplementation implements JobService {
         List<JobDTO> jobDTOS = new ArrayList<>();
 
         for(Job job: jobs){
-            JobDTO jobDTO =convertToDto(job);
-            jobDTOS.add(jobDTO);
+            if(job.getCompanyId()!=null){
+                JobDTO jobDTO=convertToDto(job);
+                jobDTOS.add(jobDTO);
+            }
         }
 
         return jobDTOS;
