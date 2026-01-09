@@ -1,14 +1,10 @@
 package com.navdeep.companyMS.company;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentMap;
 
 @RestController
 @RequestMapping("/companies")

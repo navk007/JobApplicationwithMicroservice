@@ -9,10 +9,9 @@ import com.navdeep.jobMS.job.dto.JobDTO;
 import com.navdeep.jobMS.job.external.Company;
 import com.navdeep.jobMS.job.external.Review;
 import com.navdeep.jobMS.job.mapper.JobMapper;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,6 +25,7 @@ public class JobServiceImplementation implements JobService {
 
     private CompanyClient companyClient;
     private ReviewClient reviewClient;
+    Integer attempt=1;
 
     @Autowired
     RestTemplate restTemplate;
@@ -57,11 +57,15 @@ public class JobServiceImplementation implements JobService {
     }
 
     @Override
+//    @CircuitBreaker(name="companyBreaker", fallbackMethod = "companyBreakerFallback")
+    @Retry(name="companyBreaker", fallbackMethod = "companyBreakerFallback")
     public List<JobDTO> findAll() {
+        System.out.println("Attempts: " + attempt++);
         List<Job> jobs=jobRepository.findAll();
         List<JobDTO> jobDTOS = new ArrayList<>();
 
         for(Job job: jobs){
+            System.out.println(job.getCompanyId());
             if(job.getCompanyId()!=null){
                 JobDTO jobDTO=convertToDto(job);
                 jobDTOS.add(jobDTO);
@@ -69,6 +73,13 @@ public class JobServiceImplementation implements JobService {
         }
 
         return jobDTOS;
+    }
+
+    public List<String> companyBreakerFallback(Exception ex){
+        List<String> list=new ArrayList<>();
+        list.add("Dummy");
+
+        return list;
     }
 
     @Override
