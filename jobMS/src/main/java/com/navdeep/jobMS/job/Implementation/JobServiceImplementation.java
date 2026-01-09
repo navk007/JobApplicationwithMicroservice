@@ -10,6 +10,7 @@ import com.navdeep.jobMS.job.external.Company;
 import com.navdeep.jobMS.job.external.Review;
 import com.navdeep.jobMS.job.mapper.JobMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,9 +57,29 @@ public class JobServiceImplementation implements JobService {
         return jobDTO;
     }
 
+    public List<String> circuitBreakerFallback(Exception ex){
+        List<String> list=new ArrayList<>();
+        list.add("Dummy");
+
+        return list;
+    }
+
+//    public String rateLimitFallback(Exception e) {
+//        return "Too many requests! Please wait and try again later.";
+//    }
+
+    public List<String> rateLimitFallback(Exception ex){
+        List<String> list=new ArrayList<>();
+        list.add("Rate Limit Exceeded");
+
+        return list;
+    }
+
+
     @Override
-//    @CircuitBreaker(name="companyBreaker", fallbackMethod = "companyBreakerFallback")
-    @Retry(name="companyBreaker", fallbackMethod = "companyBreakerFallback")
+//    @CircuitBreaker(name="jobBreaker", fallbackMethod = "jobBreakerFallback")
+//    @Retry(name="jobBreaker", fallbackMethod = "circuitBreakerFallback")
+    @RateLimiter(name = "jobRateLimitor", fallbackMethod = "rateLimitFallback")
     public List<JobDTO> findAll() {
         System.out.println("Attempts: " + attempt++);
         List<Job> jobs=jobRepository.findAll();
@@ -73,13 +94,6 @@ public class JobServiceImplementation implements JobService {
         }
 
         return jobDTOS;
-    }
-
-    public List<String> companyBreakerFallback(Exception ex){
-        List<String> list=new ArrayList<>();
-        list.add("Dummy");
-
-        return list;
     }
 
     @Override
