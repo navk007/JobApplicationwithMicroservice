@@ -1,5 +1,7 @@
 package com.navdeep.reviewMS.review;
 
+import com.navdeep.reviewMS.review.dto.ReviewMessage;
+import com.navdeep.reviewMS.review.messaging.ReviewMessageProducer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +13,11 @@ import java.util.List;
 public class ReviewController {
 
     private ReviewService reviewService;
+    private ReviewMessageProducer reviewMessageProducer;
 
-    public ReviewController(ReviewService reviewService){
+    public ReviewController(ReviewService reviewService, ReviewMessageProducer reviewMessageProducer) {
         this.reviewService=reviewService;
+        this.reviewMessageProducer=reviewMessageProducer;
     }
 
     @GetMapping("/{reviewId}")
@@ -30,6 +34,7 @@ public class ReviewController {
     public ResponseEntity<String> createReview(@RequestParam Long companyId, @RequestBody Review review){
         Boolean isCreated=reviewService.createReview(companyId, review);
         if(isCreated){
+            reviewMessageProducer.sendMessage(review);
             return new ResponseEntity<>("Review created Successfully", HttpStatus.OK);
         }
         else{
@@ -51,5 +56,23 @@ public class ReviewController {
 
         if(isUpdated) return new ResponseEntity<>(reviewService.getReviewForSpecificCompany(reviewId), HttpStatus.OK);
         else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/averageRating")
+    public Double getAverageReview(@RequestParam Long companyId){
+        List<Review> reviewsList=reviewService.getAllReviews(companyId);
+        return reviewsList.stream().mapToDouble(Review::getRating).average().orElse(0.0);
+//        Integer totalReviews=reviewsList.size();
+//        Double sumOfReviewsRating=0d;
+//
+//        if(totalReviews!=0){
+//            for(Review review: reviewsList){
+//                sumOfReviewsRating+=review.getRating();
+//            }
+//
+//            return sumOfReviewsRating/totalReviews;
+//        }
+//
+//        return 0;
     }
 }

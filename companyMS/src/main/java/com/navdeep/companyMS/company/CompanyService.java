@@ -1,5 +1,7 @@
 package com.navdeep.companyMS.company;
 
+import com.navdeep.companyMS.company.dto.ReviewMessage;
+
 import java.util.List;
 
 public interface CompanyService {
@@ -8,4 +10,5 @@ public interface CompanyService {
     void createCompany(Company company);
     Boolean deleteCompany(Long id);
     Boolean updateCompany(Long id, Company company);
+    void updateCompanyRating(ReviewMessage reviewMessage);
 }

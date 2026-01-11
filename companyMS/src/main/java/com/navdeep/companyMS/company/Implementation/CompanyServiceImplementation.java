@@ -3,7 +3,11 @@ package com.navdeep.companyMS.company.Implementation;
 import com.navdeep.companyMS.company.Company;
 import com.navdeep.companyMS.company.CompanyRepository;
 import com.navdeep.companyMS.company.CompanyService;
+import com.navdeep.companyMS.company.clients.ReviewClient;
+import com.navdeep.companyMS.company.dto.ReviewMessage;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,10 +15,12 @@ import java.util.Optional;
 @Service
 public class CompanyServiceImplementation implements CompanyService {
 
-    CompanyRepository companyRepository;
+    private CompanyRepository companyRepository;
+    private ReviewClient reviewClient;
 
-    public CompanyServiceImplementation(CompanyRepository companyRepository){
+    public CompanyServiceImplementation(CompanyRepository companyRepository, ReviewClient reviewClient){
         this.companyRepository=companyRepository;
+        this.reviewClient=reviewClient;
     }
 
     @Override
@@ -55,5 +61,13 @@ public class CompanyServiceImplementation implements CompanyService {
             return true;
         }
         return false;
+    }
+
+    public void updateCompanyRating(ReviewMessage reviewMessage){
+//        System.out.println(reviewMessage.getCompanyId());
+        Company company=companyRepository.findById(reviewMessage.getCompanyId()).orElseThrow(()-> new NotFoundException("Company not found" + reviewMessage.getCompanyId()));
+        Double averageRating= reviewClient.getAverageRatingForCompany(reviewMessage.getCompanyId());
+        company.setRating(averageRating);
+        companyRepository.save(company);
     }
 }
