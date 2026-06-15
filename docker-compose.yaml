@@ -12,11 +12,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U navk007" ]
+      test: ["CMD-SHELL", "pg_isready -U navk007"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
+      - microservice-network
       - postgres
 
   pgadmin:
@@ -38,24 +39,117 @@ services:
     image: openzipkin/zipkin
     container_name: zipkin
     ports:
-      - 9411:9411
+      - "9411:9411"
     networks:
       - postgres
+      - microservice-network
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - postgres
+      - microservice-network
+
+  servicereg:
+    image: navk007/servicereg
+    container_name: servicereg
+    ports:
+      - "8761:8761"
+    depends_on:
+      - rabbitmq
+      - zipkin
+      - postgres
+      - pgadmin
+    networks:
+      - microservice-network
+      - postgres
+
+  config-server-ms:
+    image: navk007/config-server-ms
+    container_name: config-server-ms
+    ports:
+      - "8080:8080"
+    depends_on:
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  companyms:
+    image: navk007/companyms
+    container_name: companyMS
+    ports:
+      - "8081:8081"
+    depends_on:
+      - config-server-ms
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://servicereg:8761/eureka
+
+  jobms:
+    image: navk007/jobms
+    container_name: jobMS
+    ports:
+      - "8082:8082"
+    depends_on:
+      - config-server-ms
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://servicereg:8761/eureka
+
+  reviewms:
+    image: navk007/reviewms
+    container_name: reviewMS
+    ports:
+      - "8083:8083"
+    depends_on:
+      - config-server-ms
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://servicereg:8761/eureka
+
+  gateway-ms:
+    image: navk007/gateway-ms
+    ports:
+      - "8084:8084"
+    depends_on:
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://servicereg:8761/eureka
 
 networks:
+  microservice-network:
+    driver: bridge
   postgres:
     driver: bridge
 
 volumes:
   pgadmin:
   pgdata:
-

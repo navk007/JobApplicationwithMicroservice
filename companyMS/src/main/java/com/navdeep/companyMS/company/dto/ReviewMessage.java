@@ -1,6 +1,7 @@
 package com.navdeep.companyMS.company.dto;
 
-public class ReviewMessage {
+public class
+ReviewMessage {
     private Long id;
     private String title;
     private String description;
